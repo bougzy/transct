@@ -104,7 +104,7 @@
         </div>
     </div>
 
-    <div class="container mt-4">
+    <!-- <div class="container mt-4">
         <h1>User Dashboard</h1>
         <div class="mb-4">
             <h4>Your Profile</h4>
@@ -112,6 +112,18 @@
             <p><strong>Email:</strong> <span id="userEmail"></span></p>
             <p><strong>Balance:</strong> $<span id="balance"></span></p>
             <p><strong>Total Profits:</strong> $<span id="profits"></span></p>
+        </div> -->
+
+
+        <div class="container mt-4">
+            <h1>User Dashboard</h1>
+            <div class="mb-4">
+                <h4>Your Profile</h4>
+                <p><strong>Name:</strong> <span id="userName">Loading...</span></p>
+                <p><strong>Email:</strong> <span id="userEmail">Loading...</span></p>
+                <p><strong>Balance:</strong> $<span id="balance">Loading...</span></p>
+                <p><strong>Total Profits:</strong> $<span id="profits">Loading...</span></p>
+            </div>
         </div>
 
         <ul class="nav nav-tabs" id="dashboardTabs" role="tablist">
@@ -268,36 +280,86 @@
         // }
         
 
-        async function fetchUserData() {
-    const token = localStorage.getItem('token');
-    if (!token) {
-        alert("User not authenticated, please log in again.");
-        window.location.href = '/login.html';
-        return;
-    }
+//         async function fetchUserData() {
+//     const token = localStorage.getItem('token');
+//     if (!token) {
+//         alert("User not authenticated, please log in again.");
+//         window.location.href = '/login.html';
+//         return;
+//     }
     
-    try {
-        const response = await fetch('http://localhost:5000/api/users/me', {
-            headers: { 'Authorization': `Bearer ${token}` },
-        });
+//     try {
+//         const response = await fetch('http://localhost:5000/api/users/me', {
+//             headers: { 'Authorization': `Bearer ${token}` },
+//         });
 
-        if (response.ok) {
-            const user = await response.json();
-            document.getElementById('userName').textContent = user.name || 'N/A';
-            document.getElementById('userEmail').textContent = user.email || 'N/A';
-            document.getElementById('balance').textContent = (user.balance || 0).toFixed(2);
-            document.getElementById('profits').textContent = (user.profits || 0).toFixed(2);
-        } else if (response.status === 403) {
-            alert("Forbidden: Invalid token or session expired.");
-            localStorage.removeItem('token');
-            window.location.href = '/login.html';
-        } else {
-            alert('Failed to fetch user data');
+//         if (response.ok) {
+//             const user = await response.json();
+//             document.getElementById('userName').textContent = user.name || 'N/A';
+//             document.getElementById('userEmail').textContent = user.email || 'N/A';
+//             document.getElementById('balance').textContent = (user.balance || 0).toFixed(2);
+//             document.getElementById('profits').textContent = (user.profits || 0).toFixed(2);
+//         } else if (response.status === 403) {
+//             alert("Forbidden: Invalid token or session expired.");
+//             localStorage.removeItem('token');
+//             window.location.href = '/login.html';
+//         } else {
+//             alert('Failed to fetch user data');
+//         }
+//     } catch (error) {
+//         alert(`An error occurred: ${error.message}`);
+//     }
+// }
+
+
+async function fetchUserData() {
+            console.log('Starting fetchUserData...');
+            const apiUrl = 'http://localhost:5000/api/users/me';
+
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    alert("User not authenticated. Redirecting to login.");
+                    window.location.href = '/login.html';
+                    return;
+                }
+
+                console.log('Token:', token);
+
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                });
+
+                console.log('Response Status:', response.status);
+
+                if (response.ok) {
+                    const user = await response.json();
+                    console.log('User Data:', user);
+
+                    // Update UI
+                    document.getElementById('userName').textContent = user.name || 'N/A';
+                    document.getElementById('userEmail').textContent = user.email || 'N/A';
+                    document.getElementById('balance').textContent = (user.balance || 0).toFixed(2);
+                    document.getElementById('profits').textContent = (user.profits || 0).toFixed(2);
+                } else if (response.status === 403) {
+                    alert("Forbidden: Invalid token or session expired.");
+                    localStorage.removeItem('token');
+                    window.location.href = '/login.html';
+                } else {
+                    alert(`Failed to fetch user data. Status: ${response.status}`);
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+                alert(`An error occurred: ${error.message}`);
+            }
         }
-    } catch (error) {
-        alert(`An error occurred: ${error.message}`);
-    }
-}
+
+        // Fetch user data on page load
+        fetchUserData();
 
 
 
