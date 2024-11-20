@@ -238,35 +238,69 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     
     <script>
-        async function fetchUserData() {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                alert("User not authenticated, please login again.");
-                window.location.href = '/login.html';
-                return;
-            }
-            const response = await fetch('http://localhost:5000/api/users/me', {
-                headers: { 'Authorization': `Bearer ${token}` },
-            });
-            if (response.ok) {
-                const user = await response.json();
-                document.getElementById('userName').textContent = user.name;
-                document.getElementById('userEmail').textContent = user.email;
-                document.getElementById('balance').textContent = user.balance.toFixed(2);
-                document.getElementById('profits').textContent = user.profits.toFixed(2);
-                if (user.profits > previousProfit) {
-                    alert(`Your profits have increased! New profit: $${user.profits.toFixed(2)}`);
-                }
-                previousProfit = user.profits;
-            } else if (response.status === 403) {
-                alert("Forbidden: Invalid token or session expired.");
-                localStorage.removeItem('token');
-                window.location.href = '/login.html';
-            } else {
-                alert('Failed to fetch user data');
-            }
-        }
+        // async function fetchUserData() {
+        //     const token = localStorage.getItem('token');
+        //     if (!token) {
+        //         alert("User not authenticated, please login again.");
+        //         window.location.href = '/login.html';
+        //         return;
+        //     }
+        //     const response = await fetch('http://localhost:5000/api/users/me', {
+        //         headers: { 'Authorization': `Bearer ${token}` },
+        //     });
+        //     if (response.ok) {
+        //         const user = await response.json();
+        //         document.getElementById('userName').textContent = user.name;
+        //         document.getElementById('userEmail').textContent = user.email;
+        //         document.getElementById('balance').textContent = user.balance.toFixed(2);
+        //         document.getElementById('profits').textContent = user.profits.toFixed(2);
+        //         if (user.profits > previousProfit) {
+        //             alert(`Your profits have increased! New profit: $${user.profits.toFixed(2)}`);
+        //         }
+        //         previousProfit = user.profits;
+        //     } else if (response.status === 403) {
+        //         alert("Forbidden: Invalid token or session expired.");
+        //         localStorage.removeItem('token');
+        //         window.location.href = '/login.html';
+        //     } else {
+        //         alert('Failed to fetch user data');
+        //     }
+        // }
         
+
+        async function fetchUserData() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        alert("User not authenticated, please log in again.");
+        window.location.href = '/login.html';
+        return;
+    }
+    
+    try {
+        const response = await fetch('https://your-backend-domain/api/users/me', {
+            headers: { 'Authorization': `Bearer ${token}` },
+        });
+
+        if (response.ok) {
+            const user = await response.json();
+            document.getElementById('userName').textContent = user.name || 'N/A';
+            document.getElementById('userEmail').textContent = user.email || 'N/A';
+            document.getElementById('balance').textContent = (user.balance || 0).toFixed(2);
+            document.getElementById('profits').textContent = (user.profits || 0).toFixed(2);
+        } else if (response.status === 403) {
+            alert("Forbidden: Invalid token or session expired.");
+            localStorage.removeItem('token');
+            window.location.href = '/login.html';
+        } else {
+            alert('Failed to fetch user data');
+        }
+    } catch (error) {
+        alert(`An error occurred: ${error.message}`);
+    }
+}
+
+
+
         const socket = new WebSocket('ws://localhost:5000');
         socket.onopen = function () {
             console.log('Connected to WebSocket server');
